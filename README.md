@@ -138,19 +138,27 @@ docker run -p 3000:3000 file-compression-service
 
 ## Deployment
 
-### Fly.io
+### Vercel (Primary Target)
 
-* Create app: `fly launch`
-* Set memory: 512MB–1GB
-* Deploy: `fly deploy`
+> Note: Vercel is optimized for lightweight, short‑running workloads. For CPU‑heavy or very large files, apply strict limits.
 
-### Render
+**Guidelines**
 
-* Connect repo
-* Use Dockerfile
-* Set service type: Web Service
+* Prefer lightweight algorithms (gzip, brotli, low/medium zstd levels)
+* Avoid very large files (recommend < 20–30MB)
+* Keep execution time short
+* Use streaming where possible
+* No persistent storage — rely on ephemeral temp files
 
----
+**Setup**
+
+* Use Vercel Serverless Functions (Node or Go runtime if supported)
+* Configure max memory/time within Vercel limits
+* Enforce file size limits at the edge
+
+**Hybrid Option**
+
+* Small files → compress on
 
 ## CI/CD (GitLab)
 
@@ -173,4 +181,11 @@ docker run -p 3000:3000 file-compression-service
 ## When to Use
 
 * When compression is not your core feature
-* When you need to protect your m
+* When you need to protect your main app from CPU spikes
+* When files can be large or numerous
+
+---
+
+## License
+
+MIT or your preferred license
