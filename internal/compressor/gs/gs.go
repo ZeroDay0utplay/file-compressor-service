@@ -17,29 +17,26 @@ type Config struct {
 }
 
 type Compressor struct {
-	config Config
+	cfg Config
 }
 
-func New(config Config) *Compressor {
-	if config.Timeout == 0 {
-		config.Timeout = 90 * time.Second
+func New(cfg Config) *Compressor {
+	if cfg.Timeout == 0 {
+		cfg.Timeout = 90 * time.Second
 	}
-	if config.DefaultPreset == "" {
-		config.DefaultPreset = "/ebook"
+	if cfg.DefaultPreset == "" {
+		cfg.DefaultPreset = "/ebook"
 	}
-	return &Compressor{config: config}
+	return &Compressor{cfg: cfg}
 }
 
 func (c *Compressor) Compress(ctx context.Context, inputPath string, preset string) (string, error) {
 	if preset == "" {
-		preset = c.config.DefaultPreset
+		preset = c.cfg.DefaultPreset
 	}
-
-	outputPath := filepath.Join(os.TempDir(), "compressed-"+uuid.New().String()+".pdf")
-
-	ctx2, cancel := context.WithTimeout(ctx, c.config.Timeout)
+	outPath := filepath.Join(os.TempDir(), "compressed-"+uuid.New().String()+".pdf")
+	ctx2, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
 	defer cancel()
-
 	cmd := exec.CommandContext(
 		ctx2,
 		"gs",
@@ -49,15 +46,13 @@ func (c *Compressor) Compress(ctx context.Context, inputPath string, preset stri
 		"-dNOPAUSE",
 		"-dQUIET",
 		"-dBATCH",
-		"-sOutputFile="+outputPath,
+		"-sOutputFile="+outPath,
 		inputPath,
 	)
-
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		_ = os.Remove(outputPath)
+		_ = os.Remove(outPath)
 		return "", fmt.Errorf("gs failed: %w (%s)", err, out)
 	}
-
-	return outputPath, nil
+	return outPath, nil
 }

@@ -4,25 +4,23 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/ZeroDay0utplay/file-compressor-service/internal/compressor"
 )
 
-type Compressor interface {
-	Compress(ctx context.Context, inputPath string, preset string) (string, error)
+type Dependencies struct {
+	Registry       *compressor.Registry
+	Limiter        Limiter
+	TempStore      TempStore
+	MaxUploadBytes int64
+	RequestTimeout time.Duration
 }
 
-type WorkerPool interface {
+type Limiter interface {
 	Acquire(ctx context.Context) error
 	Release()
 }
 
 type TempStore interface {
-	Save(ctx context.Context, req *http.Request) (string, string, error)
-}
-
-type Dependencies struct {
-	Compressor     Compressor
-	WorkerPool     WorkerPool
-	TempStore      TempStore
-	MaxUploadBytes int64
-	RequestTimeout time.Duration
+	Save(ctx context.Context, req *http.Request) (path string, filename string, err error)
 }

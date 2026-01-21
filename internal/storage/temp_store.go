@@ -29,9 +29,7 @@ func (s *TempStore) Save(ctx context.Context, req *http.Request) (string, string
 	if err != nil || mediaType != "multipart/form-data" {
 		return "", "", ErrMissingFile
 	}
-
 	reader := multipart.NewReader(req.Body, params["boundary"])
-
 	for {
 		part, err := reader.NextPart()
 		if err == io.EOF {
@@ -40,19 +38,16 @@ func (s *TempStore) Save(ctx context.Context, req *http.Request) (string, string
 		if err != nil {
 			return "", "", err
 		}
-
 		if part.FileName() == "" {
 			_ = part.Close()
 			continue
 		}
-
 		path := filepath.Join(os.TempDir(), "upload-"+uuid.New().String())
 		f, err := os.Create(path)
 		if err != nil {
 			part.Close()
 			return "", "", err
 		}
-
 		_, err = io.Copy(f, part)
 		f.Close()
 		part.Close()
@@ -60,9 +55,7 @@ func (s *TempStore) Save(ctx context.Context, req *http.Request) (string, string
 			_ = os.Remove(path)
 			return "", "", err
 		}
-
 		return path, part.FileName(), nil
 	}
-
 	return "", "", ErrMissingFile
 }

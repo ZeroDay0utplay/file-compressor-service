@@ -1,4 +1,4 @@
-FROM golang:1.22.2 AS builder
+FROM golang:1.22.4 AS builder
 
 WORKDIR /app
 
@@ -7,17 +7,8 @@ RUN go mod download
 
 COPY . .
 
-ARG VERSION=dev
-ARG COMMIT=unknown
-ARG BUILD_TIME=unknown
-
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build \
-    -ldflags="-s -w \
-      -X main.version=${VERSION} \
-      -X main.commit=${COMMIT} \
-      -X main.buildTime=${BUILD_TIME}" \
-    -o server ./cmd/server
+    go build -o server ./cmd/server
 
 FROM debian:bookworm-slim
 
