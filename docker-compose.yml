@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  file-compressor:
+    build: .
+    image: file-compressor-service
+    container_name: file-compressor
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    restart: unless-stopped

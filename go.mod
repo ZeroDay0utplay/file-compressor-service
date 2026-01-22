@@ -1,10 +1,13 @@
-module github.com/ZeroDay0utplay/file-compressor-service.git
+module github.com/ZeroDay0utplay/file-compressor-service
 
 go 1.23.0
 
 toolchain go1.24.12
 
-require github.com/gin-gonic/gin v1.11.0
+require (
+	github.com/gin-gonic/gin v1.11.0
+	github.com/google/uuid v1.6.0
+)
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect

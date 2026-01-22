@@ -1,39 +1,43 @@
-FROM golang:1.22.2 AS builder
+# ---------- Build stage ----------
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
+# Enable Go toolchain auto-download (required for toolchain directive)
+ENV GOTOOLCHAIN=auto
+
+# Cache dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy source
 COPY . .
 
-ARG VERSION=dev
-ARG COMMIT=unknown
-ARG BUILD_TIME=unknown
-
+# Build static binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build \
-    -ldflags="-s -w \
-      -X main.version=${VERSION} \
-      -X main.commit=${COMMIT} \
-      -X main.buildTime=${BUILD_TIME}" \
-    -o server ./cmd/server
+    go build -trimpath -ldflags="-s -w" -o server ./cmd/server
 
+
+# ---------- Runtime stage ----------
 FROM debian:bookworm-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      ghostscript \
       ca-certificates \
       tzdata \
+      ghostscript \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY --from=builder /app/server .
+# Create non-root user
+RUN useradd -r -u 10001 nonroot
 
-USER nobody:nogroup
+# Copy binary
+COPY --from=builder --chown=nonroot:nonroot /app/server /app/server
 
-EXPOSE 3000
+USER nonroot
 
-CMD ["./server"]
+EXPOSE 3001
+
+ENTRYPOINT ["/app/server"]
