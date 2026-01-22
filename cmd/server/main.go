@@ -39,8 +39,6 @@ func main() {
 		port = "3000"
 	}
 
-	println("PORT: ", os.Getenv("PORT"))
-
 	maxConcurrency := getenvInt("MAX_CONCURRENCY", 1)
 	maxUploadMB := getenvInt("MAX_UPLOAD_MB", 100)
 	requestTimeout := getenvDuration("REQUEST_TIMEOUT_SEC", 120)
